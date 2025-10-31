@@ -3,3 +3,4 @@ aiosqlite==0.18.0
 flask==2.2.5
 flask-cors==4.0.0
 python-dotenv==0.19.2
+pydantic==1.10.12
