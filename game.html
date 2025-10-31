@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duck Business Game</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .balance {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            flex: 1;
+            min-width: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 400px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .business-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .business-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .business-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .business-income {
+            color: #4ade80;
+            font-size: 18px;
+        }
+        
+        .business-status {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .button-success {
+            background: #4ade80;
+            color: #1e293b;
+        }
+        
+        .button-danger {
+            background: #f87171;
+            color: white;
+        }
+        
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .item-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .item-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .item-name {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .item-price {
+            color: #fbbf24;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .marketplace-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .box-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .box-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .box-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.7;
+        }
+        
+        .timer {
+            font-family: monospace;
+            font-size: 18px;
+            color: #fbbf24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка -->
+        <div class="header">
+            <div class="balance-label">Баланс</div>
+            <div class="balance" id="balance">0</div>
+            <div style="display: flex; justify-content: space-around; margin-top: 10px; font-size: 14px;">
+                <div>⭐ <span id="stars">0</span></div>
+                <div>💎 <span id="ton">0</span></div>
+            </div>
+        </div>
+
+        <!-- Табы -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('businesses')">🏢 Бизнесы</button>
+            <button class="tab" onclick="switchTab('shop')">🛒 Магазин</button>
+            <button class="tab" onclick="switchTab('market')">🏪 Маркет</button>
+            <button class="tab" onclick="switchTab('boxes')">📦 Боксы</button>
+        </div>
+
+        <!-- Контент -->
+        <div class="content">
+            <!-- Загрузка -->
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 15px;">Загрузка...</p>
+            </div>
+
+            <!-- Бизнесы -->
+            <div id="businesses-tab" class="tab-content">
+                <h2 style="margin-bottom: 15px;">💼 Мои бизнесы</h2>
+                <div id="businesses-list"></div>
+                <h3 style="margin: 20px 0 15px;">🆕 Купить бизнес</h3>
+                <div id="available-businesses"></div>
+            </div>
+
+            <!-- Магазин -->
+            <div id="shop-tab" class="tab-content">
+                <h2 style="margin-bottom: 15px;">🛒 Магазин</h2>
+                
+                <h3 style="margin-bottom: 10px;">🚗 Машины</h3>
+                <div class="item-grid" id="shop-cars"></div>
+                
+                <h3 style="margin: 20px 0 10px;">🏠 Недвижимость</h3>
+                <div class="item-grid" id="shop-apartments"></div>
+                
+                <h3 style="margin: 20px 0 10px;">✨ Другое</h3>
+                <div class="item-grid" id="shop-other"></div>
+            </div>
+
+            <!-- Маркетплейс -->
+            <div id="market-tab" class="tab-content">
+                <h2 style="margin-bottom: 15px;">🏪 Маркетплейс</h2>
+                
+                <h3 style="margin-bottom: 10px;">📦 Мои предметы</h3>
+                <div id="my-items"></div>
+                
+                <h3 style="margin: 20px 0 10px;">🛍️ Доступно для покупки</h3>
+                <div id="marketplace-items"></div>
+            </div>
+
+            <!-- Боксы -->
+            <div id="boxes-tab" class="tab-content">
+                <h2 style="margin-bottom: 15px;">📦 Боксы</h2>
+                <div class="box-grid" id="boxes-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = parseInt(urlParams.get('user_id'));
+        
+        let gameData = null;
+        let config = null;
+        let timers = {};
+
+        // Переключение табов
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            if (tabName === 'market') {
+                loadMarketplace();
+            }
+        }
+
+        // Загрузка данных
+        async function loadData() {
+            try {
+                // Загружаем конфигурацию
+                const configRes = await fetch('/api/config');
+                config = await configRes.json();
+                
+                // Загружаем данные игрока
+                const res = await fetch(`/api/player/${userId}`);
+                gameData = await res.json();
+                
+                updateUI();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('businesses-tab').classList.add('active');
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Ошибка загрузки данных');
+            }
+        }
+
+        // Обновление UI
+        function updateUI() {
+            // Баланс
+            document.getElementById('balance').textContent = Math.floor(gameData.player.balance);
+            document.getElementById('stars').textContent = gameData.player.stars;
+            document.getElementById('ton').textContent = gameData.player.ton_balance.toFixed(2);
+            
+            // Бизнесы
+            renderBusinesses();
+            renderAvailableBusinesses();
+            renderShop();
+            renderMyItems();
+            renderBoxes();
+        }
+
+        // Рендер бизнесов
+        function renderBusinesses() {
+            const container = document.getElementById('businesses-list');
+            container.innerHTML = '';
+            
+            if (gameData.businesses.length === 0) {
+                container.innerHTML = '<div class="empty-state">У вас пока нет бизнесов</div>';
+                return;
+            }
+            
+            gameData.businesses.forEach(business => {
+                const businessConfig = config.businesses[business.business_id];
+                const card = document.createElement('div');
+                card.className = 'business-card';
+                
+                const isWorking = business.is_working;
+                const canClaim = isWorking && business.work_started_at;
+                
+                let statusHTML = '';
+                let buttonHTML = '';
+                
+                if (isWorking && canClaim) {
+                    const startTime = new Date(business.work_started_at);
+                    const now = new Date();
+                    const elapsed = (now - startTime) / 1000 / 3600; // часы
+                    const remaining = Math.max(0, 4 - elapsed);
+                    
+                    if (remaining > 0) {
+                        statusHTML = `<div class="business-status">⏳ Работает... <span class="timer" id="timer-${business.id}"></span></div>`;
+                        buttonHTML = `<button class="button button-primary" disabled>Собрать прибыль</button>`;
+                        
+                        // Запускаем таймер
+                        startTimer(business.id, remaining * 3600);
+                    } else {
+                        statusHTML = `<div class="business-status">✅ Готово! Соберите прибыль</div>`;
+                        buttonHTML = `<button class="button button-success" onclick="claimBusiness(${business.id})">💰 Собрать ${businessConfig.income}</button>`;
+                    }
+                } else {
+                    statusHTML = `<div class="business-status">😴 Не работает</div>`;
+                    buttonHTML = `<button class="button button-primary" onclick="startBusiness(${business.id})">▶️ Начать работу</button>`;
+                }
+                
+                card.innerHTML = `
+                    <div class="business-header">
+                        <div class="business-name">${businessConfig.name}</div>
+                        <div class="business-income">+${businessConfig.income}/4ч</div>
+                    </div>
+                    ${statusHTML}
+                    ${buttonHTML}
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Таймер
+        function startTimer(businessId, seconds) {
+            if (timers[businessId]) {
+                clearInterval(timers[businessId]);
+            }
+            
+            let remaining = Math.ceil(seconds);
+            
+            const updateTimer = () => {
+                const hours = Math.floor(remaining / 3600);
+                const minutes = Math.floor((remaining % 3600) / 60);
+                const secs = remaining % 60;
+                
+                const timerEl = document.getElementById(`timer-${businessId}`);
+                if (timerEl) {
+                    timerEl.textContent = `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                }
+                
+                remaining--;
+                
+                if (remaining < 0) {
+                    clearInterval(timers[businessId]);
+                    loadData(); // Перезагружаем данные
+                }
+            };
+            
+            updateTimer();
+            timers[businessId] = setInterval(updateTimer, 1000);
+        }
+
+        // Начать работу бизнеса
+        async function startBusiness(businessId) {
+            try {
+                const res = await fetch('/api/business/start', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId, business_id: businessId})
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    await loadData();
+                } else {
+                    alert(data.error || 'Ошибка');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка');
+            }
+        }
+
+        // Собрать прибыль
+        async function claimBusiness(businessId) {
+            try {
+                const res = await fetch('/api/business/claim', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId, business_id: businessId})
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    tg.showPopup({
+                        title: '🎉 Успех!',
+                        message: `Вы заработали ${data.earned}!`,
+                        buttons: [{type: 'ok'}]
+                    });
+                    await loadData();
+                } else {
+                    alert(data.error || 'Ошибка');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка');
+            }
+        }
+
+        // Рендер доступных бизнесов
+        function renderAvailableBusinesses() {
+            const container = document.getElementById('available-businesses');
+            container.innerHTML = '';
+            
+            const ownedIds = gameData.businesses.map(b => b.business_id);
+            
+            Object.entries(config.businesses).forEach(([id, business]) => {
+                const businessId = parseInt(id);
+                if (ownedIds.includes(businessId)) return;
+                
+                const card = document.createElement('div');
+                card.className = 'business-card';
+                
+                const canBuy = gameData.player.balance >= business.price;
+                
+                card.innerHTML = `
+                    <div class="business-header">
+                        <div class="business-name">${business.name}</div>
+                        <div class="business-income">+${business.income}/4ч</div>
+                    </div>
+                    <button class="button ${canBuy ? 'button-success' : 'button-primary'}" 
+                            ${!canBuy ? 'disabled' : ''} 
+                            onclick="buyBusiness(${businessId})">
+                        💰 Купить за ${business.price}
+                    </button>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Купить бизнес
+        async function buyBusiness(businessId) {
+            try {
+                const res = await fetch('/api/business/buy', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId, business_id: businessId})
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    tg.showPopup({
+                        title: '🎉 Успех!',
+                        message: 'Бизнес куплен!',
+                        buttons: [{type: 'ok'}]
+                    });
+                    await loadData();
+                } else {
+                    alert(data.error || 'Недостаточно средств');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка');
+            }
+        }
+
+        // Рендер магазина
+        function renderShop() {
+            renderShopCategory('cars', 'shop-cars');
+            renderShopCategory('apartments', 'shop-apartments');
+            renderShopCategory('other', 'shop-other');
+        }
+
+        function renderShopCategory(category, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            Object.entries(config.items[category]).forEach(([id, item]) => {
+                const itemId = parseInt(id);
+                const canBuy = gameData.player.balance >= item.price;
+                
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                
+                card.innerHTML = `
+                    <div class="item-icon">${item.name.split(' ')[0]}</div>
+                    <div class="item-name">${item.name.substring(item.name.indexOf(' ') + 1)}</div>
+                    <div class="item-price">${item.price}</div>
+                    <button class="button ${canBuy ? 'button-success' : 'button-primary'}" 
+                            ${!canBuy ? 'disabled' : ''} 
+                            style="font-size: 12px; padding: 8px;"
+                            onclick="buyItem('${category}', ${itemId})">
+                        Купить
+                    </button>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Купить предмет
+        async function buyItem(itemType, itemId) {
+            try {
+                const res = await fetch('/api/item/buy', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId, item_type: itemType, item_id: itemId})
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    tg.showPopup({
+                        title: '🎉 Успех!',
+                        message: 'Предмет куплен!',
+                        buttons: [{type: 'ok'}]
+                    });
+                    await loadData();
+                } else {
+                    alert(data.error || 'Недостаточно средств');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка');
+            }
+        }
+
+        // Мои предметы
+        function renderMyItems() {
+            const container = document.getElementById('my-items');
+            container.innerHTML = '';
+            
+            if (gameData.items.length === 0) {
+                container.innerHTML = '<div class="empty-state">У вас пока нет предметов</div>';
+                return;
+            }
+            
+            gameData.items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'marketplace-card';
+                
+                card.innerHTML = `
+                    <div>
+                        <div style="font-size: 18px;">${item.item_name}</div>
+                        <div style="font-size: 12px; opacity: 0.7;">Куплено за ${item.purchase_price}</div>
+                    </div>
+                    <button class="button button-primary" 
+                            style="width: auto; padding: 8px 15px; font-size: 12px;"
+                            onclick="sellItem(${item.id})">
+                        Продать
+                    </button>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Продать предмет
+        function sellItem(itemId) {
+            const price = prompt('Введите цену:');
+            if (!price || isNaN(price) || parseFloat(price) <= 0) {
+                alert('Неверная цена');
+                return;
+            }
+            
+            sellItemConfirm(itemId, parseFloat(price));
+        }
+
+        async function sellItemConfirm(itemId, price) {
+            try {
+                const res = await fetch('/api/marketplace/sell', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId, item_id: itemId, price: price})
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    tg.showPopup({
+                        title: '🎉 Успех!',
+                        message: 'Предмет выставлен на продажу!',
+                        buttons: [{type: 'ok'}]
+                    });
+                    await loadMarketplace();
+                } else {
+                    alert(data.error || 'Ошибка');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка');
+            }
+        }
+
+        // Загрузить маркетплейс
+        async function loadMarketplace() {
+            try {
+                const res = await fetch('/api/marketplace/list');
+                const items = await res.json();
+                
+                const container = document.getElementById('marketplace-items');
+                container.innerHTML = '';
+                
+                if (items.length === 0) {
+                    container.innerHTML = '<div class="empty-state">Пока ничего не продается</div>';
+                    return;
+                }
+                
+                items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'marketplace-card';
+                    
+                    const isMine = item.seller_id === userId;
+                    
+                    card.innerHTML = `
+                        <div>
+                            <div style="font-size: 18px;">${item.item_name}</div>
+                            <div style="font-size: 12px; opacity: 0.7;">
+                                Продавец: ${item.first_name || item.username || 'Аноним'}
+                            </div>
+                            <div style="font-size: 16px; color: #fbbf24; margin-top: 5px;">💰 ${item.price}</div>
+                        </div>
+                        ${!isMine ? `
+                            <button class="button button-success" 
+                                    style="width: auto; padding: 8px 15px; font-size: 12px;"
+                                    onclick="buyFromMarketplace(${item.id})">
+                                Купить
+                            </button>
+                        ` : '<div style="opacity: 0.7;">Ваше</div>'}
+                    `;
+                    
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Купить с маркетплейса
+        async function buyFromMarketplace(marketplaceId) {
+            try {
+                const res = await fetch('/api/marketplace/buy', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId, marketplace_id: marketplaceId})
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    tg.showPopup({
+                        title: '🎉 Успех!',
+                        message: 'Предмет куплен!',
+                        buttons: [{type: 'ok'}]
+                    });
+                    await loadData();
+                    await loadMarketplace();
+                } else {
+                    alert(data.error || 'Ошибка');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка');
+            }
+        }
+
+        // Рендер боксов
+        function renderBoxes() {
+            const container = document.getElementById('boxes-list');
+            container.innerHTML = '';
+            
+            Object.entries(config.boxes).forEach(([boxType, box]) => {
+                const canBuy = gameData.player.balance >= box.price;
+                
+                const card = document.createElement('div');
+                card.className = 'box-card';
+                
+                let icon = '📦';
+                if (boxType === 'bronze') icon = '🟤';
+                if (boxType === 'silver') icon = '⚪';
+                if (boxType === 'gold') icon = '🟡';
+                
+                card.innerHTML = `
+                    <div class="box-icon">${icon}</div>
+                    <div style="font-size: 16px; margin-bottom: 10px;">${box.name}</div>
+                    <div style="color: #fbbf24; margin-bottom: 10px;">💰 ${box.price}</div>
+                    <button class="button ${canBuy ? 'button-success' : 'button-primary'}" 
+                            ${!canBuy ? 'disabled' : ''} 
+                            style="font-size: 12px; padding: 8px;"
+                            onclick="openBox('${boxType}')">
+                        Открыть
+                    </button>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Открыть бокс
+        async function openBox(boxType) {
+            try {
+                const res = await fetch('/api/box/open', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_id: userId, box_type: boxType})
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    tg.showPopup({
+                        title: '🎉 Награда!',
+                        message: `Вы получили ${data.reward} монет!`,
+                        buttons: [{type: 'ok'}]
+                    });
+                    await loadData();
+                } else {
+                    alert(data.error || 'Ошибка');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка');
+            }
+        }
+
+        // Загрузка при старте
+        loadData();
+    </script>
+</body>
+</html>
