@@ -1,6 +1,5 @@
-aiogram==3.2.0
-aiosqlite==0.18.0
+aiogram==3.8.1
+aiosqlite==0.17.0
 flask==2.2.5
-flask-cors==4.0.0
+flask-cors==3.0.10
 python-dotenv==0.19.2
-pydantic==1.10.12
