@@ -7,71 +7,117 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
+            background: #1a1a1a;
             color: white;
-            text-align: center;
+            min-height: 100vh;
+            margin: 0;
             padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 10px 0;
+        }
+        
+        .close-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .balance {
+            background: #2a2a2a;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .ton {
+            color: #0098ea;
+            font-weight: bold;
         }
         
         .container {
             max-width: 500px;
+            margin: 0 auto;
         }
         
         h1 {
             font-size: 48px;
             margin-bottom: 20px;
+            text-align: center;
         }
         
         .description {
             font-size: 18px;
-            opacity: 0.9;
+            color: #888;
             margin-bottom: 30px;
+            text-align: center;
         }
         
         .button {
-            display: inline-block;
-            background: white;
-            color: #667eea;
+            display: block;
+            background: #0098ea;
+            color: white;
             padding: 15px 40px;
-            border-radius: 25px;
+            border-radius: 12px;
             text-decoration: none;
             font-weight: bold;
             font-size: 18px;
-            transition: transform 0.3s;
-        }
-        
-        .button:hover {
-            transform: scale(1.05);
+            text-align: center;
+            margin-bottom: 30px;
+            border: none;
+            width: 100%;
+            cursor: pointer;
         }
         
         .features {
-            margin-top: 50px;
-            text-align: left;
+            background: #2a2a2a;
+            border-radius: 15px;
+            padding: 20px;
         }
         
         .feature {
-            background: rgba(255, 255, 255, 0.1);
+            background: #333;
             padding: 15px;
-            border-radius: 15px;
+            border-radius: 10px;
             margin-bottom: 15px;
+        }
+        
+        .feature:last-child {
+            margin-bottom: 0;
+        }
+        
+        .feature strong {
+            color: #0098ea;
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <button class="close-btn">Закрыть</button>
+        <div class="balance">
+            <span class="ton">0.121 TON</span>
+            <span>10 TOWN</span>
+        </div>
+    </div>
+
     <div class="container">
         <h1>🦆 Duck Business</h1>
         <p class="description">
             Управляй бизнесами, зарабатывай деньги, торгуй с другими игроками!
         </p>
         
-        <a href="https://t.me/YOUR_BOT_USERNAME" class="button">
+        <button class="button">
             🎮 Играть в Telegram
-        </a>
+        </button>
         
         <div class="features">
             <div class="feature">
@@ -95,5 +141,15 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.querySelector('.close-btn').addEventListener('click', function() {
+            alert('Закрытие...');
+        });
+        
+        document.querySelector('.button').addEventListener('click', function() {
+            alert('Переход в Telegram...');
+        });
+    </script>
 </body>
 </html>
